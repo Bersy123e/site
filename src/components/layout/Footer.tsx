@@ -31,7 +31,7 @@ export function Footer() {
           <div>
             <h3 className="font-serif text-lg font-semibold mb-4">Документы</h3>
             <div className="space-y-2">
-              <a href="#" className="block text-muted-foreground hover:text-primary">
+              <a href="/privacy-policy" className="block text-muted-foreground hover:text-primary">
                 Политика конфиденциальности
               </a>
               <a href="#" className="block text-muted-foreground hover:text-primary">

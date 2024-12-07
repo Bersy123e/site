@@ -10,6 +10,7 @@ const stats = [
 
 export function Stats() {
   const [isVisible, setIsVisible] = useState(false);
+  const [animatedValues, setAnimatedValues] = useState(stats.map(() => 0));
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,24 +30,61 @@ export function Stats() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (isVisible) {
+      const timeouts = stats.map((stat, index) => {
+        const targetValue = stat.value;
+        let currentValue = 0;
+
+        const interval = setInterval(() => {
+          if (currentValue < targetValue) {
+            currentValue += Math.ceil(targetValue / 100);
+            setAnimatedValues((prev) => {
+              const newValues = [...prev];
+              newValues[index] = currentValue;
+              return newValues;
+            });
+          } else {
+            clearInterval(interval);
+          }
+        }, 10);
+
+        return interval;
+      });
+
+      return () => {
+        timeouts.forEach(clearInterval);
+      };
+    }
+  }, [isVisible]);
+
   return (
-    <section ref={sectionRef} className="py-24 bg-primary text-primary-foreground">
+    <section ref={sectionRef} className="py-24 bg-gradient-to-br from-emerald-800 to-green-700 text-white">
       <div className="container">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-semibold mb-4 text-white">
+            Ожидаемые результаты с автоматизацией на нейросетях
+          </h2>
+          <p className="text-xl text-white/80">
+            Статистика, достигается с помощью наших решений, зависит от сферы применения и требует индивидуальной консультации
+          </p>
+        </div>
+
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
-            <Card key={index} className="bg-transparent border-primary-foreground/20">
+            <Card key={index} className="bg-transparent border-white/20 rounded-lg shadow-md">
               <CardContent className="p-6 text-center">
-                <div className="text-4xl md:text-5xl font-bold mb-2">
+                <div className="text-4xl md:text-5xl font-bold mb-2 text-white">
                   {isVisible ? (
-                    <span className="transition-all duration-1000">
-                      {stat.value}
+                    <span>
+                      {animatedValues[index]}
                       {stat.suffix}
                     </span>
                   ) : (
                     <span>0{stat.suffix}</span>
                   )}
                 </div>
-                <p className="text-primary-foreground/80">{stat.label}</p>
+                <p className="text-white/80">{stat.label}</p>
               </CardContent>
             </Card>
           ))}

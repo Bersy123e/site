@@ -9,12 +9,20 @@ export function ContactForm() {
     name: "",
     email: "",
     phone: "",
+    consent: false, // Состояние для чекбокса
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Проверка согласия с обработкой персональных данных
+    if (!formData.consent) {
+      setErrorMessage("Вы должны согласиться на обработку персональных данных.");
+      return;
+    }
+
     setStatus("loading");
     setErrorMessage("");
 
@@ -29,7 +37,7 @@ export function ContactForm() {
 
       if (response.ok) {
         setStatus("success");
-        setFormData({ name: "", email: "", phone: "" });
+        setFormData({ name: "", email: "", phone: "", consent: false });
       } else {
         const errorData = await response.json();
         setErrorMessage(errorData.message || "Ошибка отправки. Попробуйте позже.");
@@ -84,9 +92,29 @@ export function ContactForm() {
                     required
                   />
                 </div>
+
+                {/* Чекбокс с уведомлением о согласии */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="consent"
+                    checked={formData.consent}
+                    onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
+                    className="mr-2"
+                    required
+                  />
+                  <Label htmlFor="consent" className="text-sm text-muted-foreground">
+                    Я согласен на обработку персональных данных и ознакомлен с{" "}
+                    <a href="/privacy-policy" className="text-primary hover:underline">
+                      политикой конфиденциальности
+                    </a>
+                  </Label>
+                </div>
+
                 {status === "error" && (
                   <p className="text-red-600 text-center">{errorMessage}</p>
                 )}
+
                 <Button
                   type="submit"
                   className="w-full text-sm sm:text-base py-6"
@@ -94,12 +122,6 @@ export function ContactForm() {
                 >
                   {status === "loading" ? "Отправка..." : "Записаться на консультацию"}
                 </Button>
-                <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                  Нажимая кнопку, вы соглашаетесь с нашей{" "}
-                  <a href="#" className="text-primary hover:underline">
-                    политикой конфиденциальности
-                  </a>
-                </p>
               </form>
             )}
           </CardContent>
